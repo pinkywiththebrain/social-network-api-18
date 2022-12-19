@@ -1,5 +1,37 @@
 const { Schema, model } = require('mongoose');
-//const
+
+const timestamp = (date) => {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+};
+
+const reactionSchema = new Schema(
+    {
+        reactionId: {
+            type: Schema.Types.ObjectId,
+            default: () => new Types.ObjectId(),
+        },
+        reactionBody: {
+            type: String,
+            required: true,
+            maxlength: 280,
+        },
+        username: {
+            type: String,
+            required: true,
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now(),
+            get: timestamp,
+        }
+
+    },
+    {
+        toJSON: {
+            getters: true,
+        }
+    },
+);
 
 const thoughtSchema = new Schema(
     {
@@ -12,6 +44,7 @@ const thoughtSchema = new Schema(
         createdAt: {
             type: Date,
             default: Date.now,
+            get: timestamp,
         },
         username: {
             type: String,
@@ -22,13 +55,18 @@ const thoughtSchema = new Schema(
     {
         toJSON: {
             virtuals: true,
+            getters: true,
           },
           id: false,
     }
 );
 
 //virtual called reactionCount that retrieves the length of the thought's reactions array field on query.
+thoughtSchema.virtual('reactionCount').get(function(){
+    return this.reactions.length;
+})
 
+//initializing thought model
 const Thought = model('thought', thoughtSchema);
 
 module.exports = Thought;
